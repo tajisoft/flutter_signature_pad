@@ -41,6 +41,14 @@ class _SignaturePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
   }
 
+  changeColor(Color c) {
+    strokeColor = c;
+    _linePaint = Paint()
+      ..color = strokeColor
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     _lastSize = size;
@@ -127,11 +135,7 @@ class SignatureState extends State<Signature> {
   }
 
   void setColor(Color c) {
-    strokeColor = c;
-    _linePaint = Paint()
-      ..color = strokeColor
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    _painter.changeColor(c);
   }
 
   bool get hasPoints => _points.length > 0;
