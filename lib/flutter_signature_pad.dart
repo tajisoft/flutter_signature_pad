@@ -82,9 +82,6 @@ class SignatureState extends State<Signature> {
         painter: widget.backgroundPainter,
         foregroundPainter: _painter,
         child: GestureDetector(
-            onVerticalDragStart: _onDragStart,
-            onVerticalDragUpdate: _onDragUpdate,
-            onVerticalDragEnd: _onDragEnd,
             onPanStart: _onDragStart,
             onPanUpdate: _onDragUpdate,
             onPanEnd: _onDragEnd),
