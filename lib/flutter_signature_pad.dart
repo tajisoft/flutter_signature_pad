@@ -28,7 +28,7 @@ class _SignaturePainter extends CustomPainter {
   Size _lastSize;
   final double strokeWidth;
   final List<Offset> points;
-  final Color strokeColor;
+  Color strokeColor;
   Paint _linePaint;
 
   _SignaturePainter(
@@ -122,8 +122,16 @@ class SignatureState extends State<Signature> {
 
   void clear() {
     setState(() {
-      _points = []; 
+      _points = [];
     });
+  }
+
+  void setColor(Color c) {
+    strokeColor = c;
+    _linePaint = Paint()
+      ..color = strokeColor
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
   }
 
   bool get hasPoints => _points.length > 0;
