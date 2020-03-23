@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 class Signature extends StatefulWidget {
   final Color color;
   final double strokeWidth;
+  final Size size;
   final CustomPainter backgroundPainter;
   final Function onSign;
 
   Signature({
+    this.size,
     this.color = Colors.black,
     this.strokeWidth = 5.0,
     this.backgroundPainter,
@@ -78,38 +80,39 @@ class SignatureState extends State<Signature> {
         strokeColor: widget.color,
         strokeWidth: widget.strokeWidth);
     return ClipRect(
-      child: CustomPaint(
-        painter: widget.backgroundPainter,
-        foregroundPainter: _painter,
-        child: GestureDetector(
-            onPanStart: _onDragStart,
-            onPanUpdate: _onDragUpdate,
-            onPanEnd: _onDragEnd),
-      ),
-    );
+      child: Listener(
+          onPointerDown: _onTapDownStart,
+          onPointerMove: _onMove,
+          onPointerUp: _onTapEnd,
+          child: CustomPaint(
+            size: widget.size,
+            painter: widget.backgroundPainter,
+            foregroundPainter: _painter
+          )
+        )
+      );
   }
 
-  void _onDragStart(DragStartDetails details) {
+  void _onTapDownStart(PointerDownEvent details) {
     RenderBox referenceBox = context.findRenderObject();
-    Offset localPostion = referenceBox.globalToLocal(details.globalPosition);
+    Offset localPostion = referenceBox.globalToLocal(details.position);
     setState(() {
       _points = List.from(_points)..add(localPostion)..add(localPostion);
     });
   }
 
-  void _onDragUpdate(DragUpdateDetails details) {
+  void _onMove(PointerMoveEvent details) {
     RenderBox referenceBox = context.findRenderObject();
-    Offset localPosition = referenceBox.globalToLocal(details.globalPosition);
-
+    Offset localPostion = referenceBox.globalToLocal(details.position);
     setState(() {
-      _points = List.from(_points)..add(localPosition);
+      _points = List.from(_points)..add(localPostion);
       if (widget.onSign != null) {
         widget.onSign();
       }
     });
   }
 
-  void _onDragEnd(DragEndDetails details) => _points.add(null);
+  void _onTapEnd(PointerUpEvent details) => _points.add(null);
 
   Future<ui.Image> getData() {
     var recorder = ui.PictureRecorder();
