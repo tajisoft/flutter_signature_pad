@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 class Signature extends StatefulWidget {
   final Color color;
   final double strokeWidth;
-  final Size size;
   final CustomPainter backgroundPainter;
   final Function onSign;
+  final Size size;
 
   Signature({
     this.size,
@@ -30,21 +30,13 @@ class _SignaturePainter extends CustomPainter {
   Size _lastSize;
   final double strokeWidth;
   final List<Offset> points;
-  Color strokeColor;
+  final Color strokeColor;
   Paint _linePaint;
 
   _SignaturePainter(
       {@required this.points,
       @required this.strokeColor,
       @required this.strokeWidth}) {
-    _linePaint = Paint()
-      ..color = strokeColor
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-  }
-
-  changeColor(Color c) {
-    strokeColor = c;
     _linePaint = Paint()
       ..color = strokeColor
       ..strokeWidth = strokeWidth
@@ -80,17 +72,23 @@ class SignatureState extends State<Signature> {
         strokeColor: widget.color,
         strokeWidth: widget.strokeWidth);
     return ClipRect(
-      child: Listener(
-          onPointerDown: _onTapDownStart,
-          onPointerMove: _onMove,
-          onPointerUp: _onTapEnd,
-          child: CustomPaint(
-            size: widget.size,
-            painter: widget.backgroundPainter,
-            foregroundPainter: _painter
-          )
-        )
-      );
+       child: CustomPaint(
+        size: widget.size,
+        painter: widget.backgroundPainter,
+        foregroundPainter: _painter,
+        child: GestureDetector(
+          // onPointerDown: _onTapDownStart,
+          // onPointerMove: _onMove,
+          // onPointerUp: _onTapEnd,
+            // onVerticalDragStart: _onDragStart,
+            // onVerticalDragUpdate: _onDragUpdate,
+            // onVerticalDragEnd: _onDragEnd,
+            onPanStart: _onDragStart,
+            onPanUpdate: _onDragUpdate,
+            onPanEnd: _onDragEnd
+          ),
+      ),
+    );
   }
 
   void _onTapDownStart(PointerDownEvent details) {
@@ -114,6 +112,28 @@ class SignatureState extends State<Signature> {
 
   void _onTapEnd(PointerUpEvent details) => _points.add(null);
 
+  void _onDragStart(DragStartDetails details) {
+    RenderBox referenceBox = context.findRenderObject();
+    Offset localPostion = referenceBox.globalToLocal(details.globalPosition);
+    setState(() {
+      _points = List.from(_points)..add(localPostion)..add(localPostion);
+    });
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    RenderBox referenceBox = context.findRenderObject();
+    Offset localPosition = referenceBox.globalToLocal(details.globalPosition);
+
+    setState(() {
+      _points = List.from(_points)..add(localPosition);
+      if (widget.onSign != null) {
+        widget.onSign();
+      }
+    });
+  }
+
+  void _onDragEnd(DragEndDetails details) => _points.add(null);
+
   Future<ui.Image> getData() {
     var recorder = ui.PictureRecorder();
     var origin = Offset(0.0, 0.0);
@@ -132,10 +152,6 @@ class SignatureState extends State<Signature> {
     setState(() {
       _points = [];
     });
-  }
-
-  void setColor(Color c) {
-    _painter.changeColor(c);
   }
 
   bool get hasPoints => _points.length > 0;
